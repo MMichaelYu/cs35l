@@ -1,0 +1,50 @@
+#!/bin/sh
+dir=$1
+RESULT=`ls -ap $dir | grep -v / | sort`
+declare -a ARRAY
+declare -a BARRAY
+declare -a CARRAY
+let count=0
+for FILE in $RESULT
+do
+    if [ ! -L $dir/$FILE ]
+    then
+	if [ -f $dir/$FILE ]
+	then
+	    if [ -r $dir/$FILE ]
+	    then
+		if [[ $FILE == \.* ]]
+		then
+		    ARRAY[$count]="$dir/$FILE"
+		else
+		    BARRAY[$count]="$dir/$FILE"
+		fi	      
+		let count=count+1
+	    else
+       		echo "$dir/$FILE is not readable."
+       	    fi
+	fi
+    fi
+done
+
+CARRAY=( "${ARRAY[@]}" "${BARRAY[@]}" )
+for A in ${CARRAY[*]}
+do
+for B in ${CARRAY[*]}
+do
+    if [ "$A" == "$B" ]
+    then
+	continue
+    fi
+    if cmp -s "$A" "$B"
+    then
+	if [[ $(ls -i $A | awk '{print $1}') = $(ls -i $B | awk '{print $1}') ]]
+	then
+	    continue
+	else
+	    rm "$B"
+	    ln "$A" "$B"
+	fi
+    fi
+done
+done

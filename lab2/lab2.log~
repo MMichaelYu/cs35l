@@ -1,0 +1,93 @@
+1.export LC_ALL='C'
+	This changes locale to the correct settings.
+2.cd /usr/share/dict
+	This moves to directory where the words file is located.
+3.sort -o ~/cs35l/lab2/words words
+        Creates a words file in my working directory that is a sorted version of
+	words.
+4.cd ~/cs35l/lab2
+	I move back to the working directory.
+5.wget http://web.cs.ucla.edu/classes/fall16/cs35L/assign/assign2.html 
+        This copies assign2.html into my working directory.
+6.cat <assign2.html | tr -c 'A-Za-z' '[\n*]'
+      	This replaces anything that's not an alphabetical character with a new
+	line.
+7.cat <assign2.html | tr -cs 'A-Za-z' '[\n*]'
+        This works like the above except any new lines in a row are squeezed
+	together into only one new line.
+8.cat <assign2.html | tr -cs 'A-Za-z' '[\n*]' | sort
+        Now the output from the previous command is sorted by ASCII order.
+9.cat <assign2.html | tr -cs 'A-Za-z' '[\n*]' | sort -u
+        This is the same output from the before command but without any repeated
+	entries.
+10.cat <assign2.html | tr -cs 'A-Za-z' ' [\n*]' | sort -u | comm - words
+        This compares the two files and outputs three columns. The first
+	contains entries unique to assign2.html, the second contains entries
+	unique to words, and the third contains entries that appear in both
+	files.
+11.cat <assign2.html | tr -cs 'A-Za-z' '[\n*]' | sort -u | comm -23 - words
+        This outputs the same as the above command but omits the second and
+	third column. So only entries that appear in assign2.html and not in
+	words appear.
+12.wget http://mauimapp.com/moolelo/hwnwdseng.htm
+	This puts hwnwdseng.htm into my working directory.
+13. touch buildwords.sh
+    	This creates a script file in my working directory.
+14. emacs buildwords.sh
+    	This opens the script file in emacs.
+15.#!/bin/sh
+	This tells what shell to use.
+16.set -x
+        This tells the script to print commands that were run.
+The following commands are in the script separated by |.
+
+grep '<td>.*</td>'
+     Gets everything beginning with <td> and ending with </td>.
+sed 's/<[^>]*>//g'
+     This command removes all tags.
+sed 's/ \{4\}//g'
+     This command removes tab (four whitespaces) from the input.
+tr -s '\n'
+     This squeezes new lines and eliminates blank lines.
+tr '[:upper:]' '[:lower:]'
+     This replaces uppercase letters with lowercase letters.
+tr '`' "'"
+     This command replaces ` with '.
+sed '1~2d'
+     This command removes English words which are on every odd line number.
+tr ', ' '\n'
+     This separates any Hawaiian words connected by a comma or space into
+     separate words.
+tr -s '\n'
+     This squeezes repeated new lines that were just created.
+sort -u
+     This sorts the list and removes duplicates.
+grep -v "[^pk'mnwlhaeiou]"
+     This removes lines that contain characters not in Hawaiian.
+17.cat <hwnwdseng.htm | ./buildwords.sh > hwords
+     This uses the script to build hwords, a Hawaiian word dictionary from the
+     .htm file 
+18.cat <assign2.html | tr -cs ‘A-Za-z’ ‘[\n*]’ | tr ‘[:upper:]’ ‘[:lower:]’ |
+     sort -u | comm -23 - hwords 
+     This tests the Hawaiian spell check on the webpage.
+19.cat <hwords | tr -cs 'A-Za-z' '[\n*]' | tr '[:upper:]' '[:lower:]' | sort -u
+     | comm -23 -hwords
+     This tests the Hawaiian spell check on the Hawaiian dictionary.
+20.cat <assign2.html | tr -cs 'A-Za-z' '[\n*]' | tr '[:upper:]' '[:lower:]' |
+     sort -u | comm -23 - words | wc -l
+     This counts misspelled English words in the webpage. This counts 39.
+21.cat <assign2.html | tr -cs 'A-Za-z' '[\n*]' | tr '[:upper:]' '[:lower:]' |
+     sort -u | comm -23 - hwords | wc -l
+     This counts misspelled Hawaiian words in the webpage. This counts 406.
+22.cat <assign2.html | tr -cs 'A-Za-z' '[\n*]' | tr '[:upper:]' '[:lower:]' |
+     sort -u | comm -23 - words >engwords.txt 
+     This creates a list of misspelled English words in engwords.txt.
+23.cat <assign2.html | tr -cs 'A-Za-z' '[\n*]' | tr '[:upper:]' '[:lower:]' |
+     sort -u | comm -23 - hwords >hawwords.txt 
+     This creates a list of misspelled Hawaiian words in hawwords.txt.
+24.comm -13 engwords.txt hawwords.txt
+     This lists words written correctly as English but not in Hawaiian. These
+     include word, words, work, working, worry, write.
+25.comm -23 engwords.txt hawwords.txt
+     This lists words written correctly in Hawaiian but not in English. There
+     are three which are: halau, lau, and wiki.
