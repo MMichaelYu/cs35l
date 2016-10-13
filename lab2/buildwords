@@ -1,0 +1,2 @@
+#!/bin/sh
+grep '<td>.*</td>' | sed 's/<[^>]*>//g' | sed 's/ \{4\}//g' | tr -s '\n' | tr '[:upper:]' '[:lower:]' | tr '`' "'" | sed '1~2d' | tr ', ' '\n' | tr -s '\n' | sort -u | grep -v "[^pk'mnwlhaeiou]" 
