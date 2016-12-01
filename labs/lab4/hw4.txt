@@ -1,0 +1,29 @@
+2. git checkout v3.0 -b quote
+   I checkout 3.0 to a new branch called quote.
+3. patch -p1 < quote-3.0-patch.txt
+   I patch 3.0 with my own patch file.
+4. I learn the emacs commands
+5. C-x 4 a
+   I use this command to add the 6 files that were changed and described them
+   that they replaced ` with ' in character strings.
+6. git add .
+   git commit -F ChangeLog
+   This commits my changes and uses ChangeLog as the commit message.
+7. git format-patch -1 -stdout > formatted-patch.txt
+   I create another patch file named formatted-patch.txt.
+8. Partner: Jordan Yen
+git checkout v3.0 -b partnerbranch
+    I make a new branch for my partner's patch.
+git am ./formatted-patch.txt
+    I apply my partner's patch.
+./bootstrap
+./configure
+make
+make check
+     Then I make sure that the patch works.
+9. make distdir
+   Then I checked the ChangeLog file.
+10. export PATH=/usr/local/cs/bin:$PATH
+cd ~eggert/src/gnu/emacs
+gitk
+	I run gitk on ~eggert/src/gnu/emacs

@@ -1,0 +1,5 @@
+TopLeft window is for messages for different commits with a diagram.
+TopMiddle window is for the authors of the commits
+TopRight window is for the timestamp for the commits.
+BottomLeft window is for the changes made in the commit.
+BottomRight window is for the files changed.

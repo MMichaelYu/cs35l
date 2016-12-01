@@ -1,0 +1,15 @@
+--- ./timespec3.h	2005-09-21 23:05:39.000000000 -0700
++++ ./timespec.h	2016-10-29 02:29:39.588698000 -0700
+@@ -45,7 +45,11 @@
+ static inline int
+ timespec_cmp (struct timespec a, struct timespec b)
+ {
+-  int diff = a.tv_sec - b.tv_sec;
++  int diff = 0;
++  if ( a.tv_sec < b.tv_sec )
++    diff = -1;
++  if ( a.tv_sec > b.tv_sec )
++    diff = 1;
+   return diff ? diff : a.tv_nsec - b.tv_nsec;
+ }
+ 

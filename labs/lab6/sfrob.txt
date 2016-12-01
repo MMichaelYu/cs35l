@@ -1,0 +1,93 @@
+testing on /proc/self/maps:
+$ time cat /proc/self/maps | ./sfrobu | od -ta | wc -l
+Comparisons: 2914
+80
+
+real	0m0.004s
+user	0m0.000s
+sys	0m0.008s
+
+$ time cat /proc/self/maps | ./sfrob | od -ta | wc -l
+Comparisons: 2914
+80
+
+real	0m0.003s
+user	0m0.001s
+sys	0m0.005s
+
+$ time cat /proc/self/maps | ./sfrobs | od -ta | wc -l
+80
+
+real	0m0.008s
+user	0m0.001s
+sys	0m0.012s
+
+testing on empty file:
+
+$ time cat emptyfile | ./sfrobu | od -ta | wc -l
+Comparisons: 0
+2
+
+real	0m0.003s
+user	0m0.001s
+sys	0m0.005s
+
+$ time cat emptyfile | ./sfrob | od -ta | wc -l
+Comparisons: 0
+2
+
+real	0m0.002s
+user	0m0.000s
+sys	0m0.004s
+
+$ time cat emptyfile | ./sfrobs | od -ta | wc -l 
+1
+
+real	0m0.006s
+user	0m0.003s
+sys	0m0.009s
+
+testing on /usr/local/cs/jdk*/jre/lib/rt.jar:
+
+$ time cat /usr/local/cs/jdk*/jre/lib/rt.jar | ./sfrobu | od -ta | wc -l
+Comparisons: 10407116
+8232940
+
+real	2m7.910s
+user	0m58.908s
+sys	2m34.261s
+
+$ time cat /usr/local/cs/jdk*/jre/lib/rt.jar | ./sfrob | od -ta | wc -l
+Comparisons: 10407116
+8232940
+
+real	0m44.507s
+user	0m46.947s
+sys	0m3.185s
+
+$ time cat /usr/local/cs/jdk*/jre/lib/rt.jar | ./sfrobs | od -ta | wc -l
+
+$ time cat /usr/local/cs/jdk*/jre/lib/rt.jar | ./sfrobs | od -ta | wc -l
+8233340
+
+real	0m46.600s
+user	0m49.722s
+sys	0m5.067s
+
+As expected, sfrobu is slower than sfrob in all test cases with the difference
+being more clear as the file size gets larger. This is because sfrobu uses 
+system calls more often than sfrob which makes it much more expensive to run.
+
+input lines		comparisons
+10			20
+100			523
+500			3685
+1000			8320
+2000			18540
+
+Putting this data into a spreadsheet, I get a trend line of #comparisons = 9.36
+* (#input lines) - 543.32. 
+The script version, sfrobs seems to be the slowest amongst sfrob and sfrobu 
+except with really large files. In the case of really large files, sfrobu still
+takes the longest.
+		

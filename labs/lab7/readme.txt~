@@ -1,0 +1,53 @@
+$ make clean check
+
+default: 
+real	0m42.647s
+user	0m42.621s
+sys	0m0.001s
+
+
+I had to make some variables global so they could be referenced in multiple
+functions. 
+I also moved some code from the main function to new_function since that portion
+of the code can be parallelized. 
+I made scaled_color into a 3-d array of size [width][height[3].
+I had to fix a bug that had to do with not correctly partitioning the threads to
+the picture. So I ended up with images that had black bars going across them,
+but after I fixed it, the pictures were drawn correctly. The bug was due to me
+using a single variable that was shared amongst the threads but was constantly
+changing which caused issues. So I replaced it with an array. 
+After the program was running correctly, I did see large improvement with using
+multiple threads. The real time generally halved in time when the # of threads
+was doubled.
+
+$ make clean check > make-log.txt
+To put output into make-log.txt file
+results: 
+
+time ./srt 1-test.ppm >1-test.ppm.tmp
+
+real	0m43.060s
+user	0m43.028s
+sys	0m0.002s
+mv 1-test.ppm.tmp 1-test.ppm
+time ./srt 2-test.ppm >2-test.ppm.tmp
+
+real	0m22.459s
+user	0m44.839s
+sys	0m0.003s
+mv 2-test.ppm.tmp 2-test.ppm
+time ./srt 4-test.ppm >4-test.ppm.tmp
+
+real	0m11.236s
+user	0m44.860s
+sys	0m0.001s
+mv 4-test.ppm.tmp 4-test.ppm
+time ./srt 8-test.ppm >8-test.ppm.tmp
+
+real	0m5.754s
+user	0m44.300s
+sys	0m0.001s
+mv 8-test.ppm.tmp 8-test.ppm
+
+$ diff baseline.ppm 1-test.ppm > diff.txt
+	There are no differences noted in diff.txt as expected.

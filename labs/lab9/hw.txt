@@ -1,0 +1,13 @@
+1.It would still be secure since the other team still does not have the private key needed to decrypt the bytes they receive. 
+Since they cannot gain any information from it, the network is still secure.
+(1) If the other team tapped the keyboards and knew all the strokes the network would not be secure. 
+The other team could easily get our password and login with that. But if I turn off Password Authentication then the network is still secure.
+(2) If the other team had control of the usb we boot off of then the network is insecure too because 
+they can just find the private key on the usb and decrypt everything.
+2. gpg —verify is not able to check if I am the creator of the tar since it only verifies the digital signature 
+and if the file had been changed since it was packaged. A signature being verified does not tell if the file was 
+created since signing a document is not the same as creating it. 
+A digital certificate would fix this problem since it comes from a secured authority. 
+The certificate includes the public key, the signature, and the name of the owner which can be used to verify who is the creator.
+
+

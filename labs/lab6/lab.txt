@@ -1,0 +1,141 @@
+1. I made a file called tr2b.c and opened it in emacs.
+I take in 2 operands called "from" and "to".
+I check if they are the same size, if they are not the same size I exit and
+print to stderr.
+I check if there are duplicates in "from", if there are I exit and print to
+stderr. 
+Then I use getchar() to get a character to translate if it is in "from" and
+putchar() the translated version.
+I compiled with:
+$ gcc -g tr2b.c -o tr2b
+
+2. For tr2u.c I followed the same steps as tr2b.c in terms of error checking. 
+Instead of using getchar(), I use read(0,&output,1) in order to get 1 byte at a
+time. 
+And instead of putchar(), I use write(1,&output,1) to write 1 byte at a time.
+I compiled with:
+$ gcc -g tr2u.c -o tr2u
+
+3.
+$ dd if=/dev/zero of=5mb bs=5000000 count=1
+   I create a filed called "5mb" that is 5mb to test my code.
+a) to another file
+
+strace -c ./tr2b 'AB' 'XY' < 5mb > tr2btest.txt
+
+% time     seconds  usecs/call     calls    errors syscall
+------ ----------- ----------- --------- --------- ----------------
+ 45.76    0.000221           3        77           write
+ 24.84    0.000120           2        79           read
+ 10.35    0.000050           6         9           mmap
+  5.38    0.000026           7         4           mprotect
+  3.52    0.000017           4         4           fstat
+  2.90    0.000014           7         2           open
+  2.07    0.000010          10         1           munmap
+  1.45    0.000007           4         2           close
+  1.45    0.000007           7         1         1 access
+  1.04    0.000005           5         1           execve
+  0.62    0.000003           3         1           brk
+  0.62    0.000003           3         1           arch_prctl
+------ ----------- ----------- --------- --------- ----------------
+100.00    0.000483                   182         1 total
+
+strace -c ./tr2u 'AB' 'XY' < 5mb > tr2utest.txt
+
+% time     seconds  usecs/call     calls    errors syscall
+------ ----------- ----------- --------- --------- ----------------
+ 55.33    5.847979           1   5000000           write
+ 44.67    4.720973           1   5000002           read
+  0.00    0.000041           6         7           mmap
+  0.00    0.000025           6         4           mprotect
+  0.00    0.000014           7         2           open
+  0.00    0.000010          10         1           munmap
+  0.00    0.000008           4         2           fstat
+  0.00    0.000007           4         2           close
+  0.00    0.000007           7         1         1 access
+  0.00    0.000005           5         1           execve
+  0.00    0.000004           4         1           brk
+  0.00    0.000004           4         1           arch_prctl
+------ ----------- ----------- --------- --------- ----------------
+100.00   10.569077              10000024         1 total
+
+b) to terminal:
+
+strace -c ./tr2b 'AB' 'XY' < 5mb
+
+% time     seconds  usecs/call     calls    errors syscall
+------ ----------- ----------- --------- --------- ----------------
+ 88.71    0.002036           0      4883           write
+  4.88    0.000112           1        79           read
+  2.18    0.000050           6         9           mmap
+  1.13    0.000026           7         4           mprotect
+  0.78    0.000018           5         4           fstat
+  0.65    0.000015           8         2           open
+  0.44    0.000010          10         1           munmap
+  0.35    0.000008           4         2           close
+  0.35    0.000008           8         1         1 access
+  0.22    0.000005           5         1           execve
+  0.17    0.000004           4         1           arch_prctl
+  0.13    0.000003           3         1           brk
+------ ----------- ----------- --------- --------- ----------------
+100.00    0.002295                  4988         1 total
+
+strace -c ./tr2u 'AB' 'XY' < 5mb
+
+% time     seconds  usecs/call     calls    errors syscall
+------ ----------- ----------- --------- --------- ----------------
+ 55.19    5.746953           1   5000000           write
+ 44.81    4.665338           1   5000002           read
+  0.00    0.000040           6         7           mmap
+  0.00    0.000026           7         4           mprotect
+  0.00    0.000013           7         2           open
+  0.00    0.000011          11         1           munmap
+  0.00    0.000008           4         2           fstat
+  0.00    0.000007           4         2           close
+  0.00    0.000007           7         1         1 access
+  0.00    0.000005           5         1           execve
+  0.00    0.000004           4         1           brk
+  0.00    0.000004           4         1           arch_prctl
+------ ----------- ----------- --------- --------- ----------------
+100.00   10.412416              10000024         1 total
+
+In both cases, tr2u makes a system call for every byte indicated by the 5000000
+write calls, which ends up being a lot more expensive and time consuming than
+tr2b which only makes a system call per buffer. Also writing to another file
+seems to be faster than writing to terminal when using tr2b. For tr2u writing to
+another file versus writing to terminal seems very similar in time.
+
+4.
+to another file:
+
+time cat 5mb | ./tr2b 'ab' 'xy' > tr2btest2.txt
+
+real	0m0.171s
+user	0m0.093s
+sys	0m0.018s
+
+time cat 5mb | ./tr2u 'ab' 'xy' > tr2utest2.txt
+
+real	0m6.297s
+user	0m0.244s
+sys	0m6.022s
+
+to terminal:
+
+time cat 5mb | ./tr2b 'ab' 'xy'
+
+real	0m0.334s
+user	0m0.133s
+sys	0m0.029s
+
+time cat 5mb | ./tr2u 'ab' 'xy'
+
+real	0m6.559s
+user	0m0.250s
+sys	0m6.282s
+
+tr2b is a lot faster than tr2u as expected since tr2b uses system calls per
+large buffers while tr2u systems calls for every byte. When copying to another
+file, tr2b is around twice as fast when compared to tr2b copying to
+terminal. However tr2u is around the same speed when copying to file or
+terminal. 

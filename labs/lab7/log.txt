@@ -1,0 +1,50 @@
+$ export PATH=/usr/local/cs/bin:$PATH
+	I make sure the PATH environment variable is set correctly.
+
+$ sort —-version
+	sort (GNU coreutils) 8.25
+	I make sure that my version of coreutils is updated past 8.6.
+
+$ cat /dev/urandom | od -A n -t f -N 80000000 | tr -s ' ' '\n' >
+randomfloats.txt  
+	I make a file with 10000000 random floating points.
+	od
+	-A n makes it so the offset is not included in the file
+	-t f makes it so that they are interpreted as doubles
+	-N 80000000 formats 80000000 bytes since we want 10000000 doubles which
+are 8 bytes each
+
+	tr
+	-s removes multiple occurrences of the newline so we have no empty lines
+	
+$ sed -i “1d” randomfloats.txt
+	I want to delete the first line which is empty
+
+$ time -p sort -g < randomfloats.txt > /dev/null
+real 36.18
+user 200.30
+sys 0.49
+
+$ time -p sort -g --parallel=1 <randomfloats.txt > /dev/null
+real 189.04
+user 188.78
+sys 0.25
+
+$ time -p sort -g --parallel=2 <randomfloats.txt > /dev/null
+real 103.08
+user 197.26
+sys 0.34
+
+$ time -p sort -g --parallel=4 <randomfloats.txt > /dev/null
+real 57.06
+user 197.68
+sys 0.36
+
+$ time -p sort -g --parallel=8 <randomfloats.txt > /dev/null
+real 36.50
+user 204.87
+sys 0.45
+
+It seems like the sort command is already parallelized since it has similar
+performance to the 8 threaded version.It seems like doubling the threads used
+almost halves the time it takes for the command to run.

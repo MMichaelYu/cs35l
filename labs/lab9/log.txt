@@ -1,0 +1,47 @@
+Partner: Nicholas Turk
+
+setup on ubuntu machine:
+$ dpkg —get-selections | grep openssh
+	Checking if I have openssh
+$ sudo apt-get install openssh-server openssh-client
+	This installs openssh if I need to
+$ hostname -I 
+	This gets the IP of the computer
+	my IP: 10.97.85.143
+	Partner’s IP: 10.97.85.144
+server part:
+$ ssh-keygen
+	Generate a key pair for the server
+$ sudo useradd -d /home/nick -m nick
+	Add a home directory and user for my partner
+$ sudo passwd nick
+	Update the password for nick (cs35l)
+$ cd /home/nick
+	Go to the new user’s directory
+$ sudo mkdir .ssh
+	Create a .ssh directory for the new user
+$ sudo chown -R nick .ssh
+	Change the owner of .ssh and all its files to my partner
+$ sudo chmod 700 .ssh
+	Allows the owner to read, write, and execute .ssh
+$ sudo apt-get install emacs24
+	Install emacs
+$ sudo chmod ugo+w /etc/ssh/sshd_config
+	Give everyone writing permission to sshd_config
+$ emacs /etc/ssh/sshd_config
+	Open sshd_config in emacs
+	Then I find the #PasswordAuthentication option and change it to no so that we don’t input a password when using ssh
+
+client part:
+$ ssh-keygen
+	Make a public key as a client
+$ ssh-copy-id -i michaelyu@10.97.85.144
+	Copy my public key to the server
+$ ssh-add 
+	Adds my private key to authentication agent
+$ ssh -X michaelyu@10.97.85.144
+	I ssh to my partner’s IP which is a server
+$ xterm, $ gedit, $ firefox 
+	Running programs on the server works
+
+

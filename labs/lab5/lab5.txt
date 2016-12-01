@@ -1,0 +1,148 @@
+1. wget
+http://web.cs.ucla.edu/classes/fall16/cs35L/assign/coreutils-with-bug.tar.gz 
+I get the bugged version of coreutils.
+
+2. tar -xzvf coreutils-7.6.tar.gz
+I extract the tar file.
+
+3. cd coreutils-with-bug
+   wget http://web.cs.ucla.edu/classes/fall16/cs35L/assign/ 
+I get the patch file.
+
+4. mkdir bugged
+   ./configure
+   --prefix=“/u/cs/ugrad/michaely/cs35l/lab5/coreutils-with-bug/bugged” 
+I configure it to make in the bugged directory I just created.
+
+5. make
+This gives me an error:
+In file included from utimecmp.c:41:0:
+utimens.h:2:5: error: conflicting types for 'futimens'
+ int futimens (int, char const *, struct timespec const [2]);
+     ^
+In file included from utimecmp.h:25:0,
+                 from utimecmp.c:25:
+/usr/include/sys/stat.h:373:12: note: previous declaration of 'futimens' was
+here
+
+ extern int futimens (int __fd, const struct timespec __times[2]) __THROW;
+            ^
+make[3]: *** [utimecmp.o] Error 1
+make[3]: Leaving directory
+            `/w/home.07/cs/ugrad/michaely/cs35l/lab5/coreutils-with-bug/lib'
+
+make[2]: *** [all] Error 2
+make[2]: Leaving directory
+`/w/home.07/cs/ugrad/michaely/cs35l/lab5/coreutils-with-bug/lib'
+
+make[1]: *** [all-recursive] Error 1
+make[1]: Leaving directory
+`/w/home.07/cs/ugrad/michaely/cs35l/lab5/coreutils-with-bug'
+
+make: *** [all] Error 2						   
+
+6. make install
+This gives me an error:
+In file included from utimecmp.c:41:0:
+utimens.h:2:5: error: conflicting types for 'futimens'
+ int futimens (int, char const *, struct timespec const [2]);
+     ^
+In file included from utimecmp.h:25:0,
+                 from utimecmp.c:25:
+/usr/include/sys/stat.h:373:12: note: previous declaration of 'futimens' was
+here
+
+ extern int futimens (int __fd, const struct timespec __times[2]) __THROW;
+            ^
+make[2]: *** [utimecmp.o] Error 1
+make[2]: Leaving directory
+            `/w/home.07/cs/ugrad/michaely/cs35l/lab5/coreutils-with-bug/lib'
+
+make[1]: *** [install] Error 2
+make[1]: Leaving directory
+`/w/home.07/cs/ugrad/michaely/cs35l/lab5/coreutils-with-bug/lib'
+
+make: *** [install-recursive] Error 1
+
+7. patch -p0 < coreutils.diff
+I patch coreutils with coreutils.diff
+
+8. make
+   make install
+Now the patched files are in effect. No errors are produced because the patch
+renames the function futimens to curetils_futimens, tee to coreutils_tee, and
+any later mentions of those functions. Originally there was conflicting types
+for 'futimens'.
+
+9. mkdir testing
+   cd testing
+   tmp=$(mktemp -d)
+   cd $tmp
+   touch -d '1918-11-11 11:00 GMT' wwi-armistice
+   touch now
+   sleep 1
+   touch now1
+   cd	
+   cd cs35l/lab5/coreutils-with-bug/bugged/bin
+   ./ls -lt /tmp/tmp.3QqjJ25LaK
+
+This reproduces the bug since wwi-armistice is listed first when it should be 
+last. 
+
+10. gdb ./ls
+    info functions
+Relevant functions might be:
+static int compare_atime(V, V);
+static int compare_ctime(V, V);
+static int compare_mtime(V, V);
+
+So I put break points at all three:
+break compare_atime
+break compare_ctime
+break compare_mtime
+
+But run -lt /tmp/tmp.3QqjJ25LaK only stops at compare_mtime. compare_mtime
+calls cmp_mtime. So I add a breakpoint with:
+break cmp_mtime 
+Running again and stepping through I see that timespec_cmp from
+lib/timespec.h:48 is called and the line 'int diff = a.tv_sec - b.tv_sec;' seems
+important. 
+
+The full function is:
+	timespec_cmp (struct timespec a, struct timespec b)
+{
+  int diff = a.tv_sec - b.tv_sec;
+  return diff ? diff : a.tv_nsec - b.tv_nsec;
+}
+
+diff can become a large negative number if b is wwi-armistice and may be the
+source of the error.
+
+       cp /u/cs/ugrad/michaely/cs35l/lab5/coreutils-with-bug/lib/timespec.h
+       /u/cs/ugrad/michaely/cs35l/lab5/coreutils-with-bug/lib/timespec2.h 
+I copy timespec.h to a file called timespec2.h
+       emacs timespec.h
+       I edit the file so timespec_cmp can only  pass -1, 0, or 1 and not diff. 
+I then build coreutils again with the new file and it works.
+       diff -u ./timespec2.h timespec.h > lab5.diff
+I create the diff file.
+       cd ..
+       emacs ChangeLog
+       C-x 4 a
+Then I wrote a description of the fixed bug.
+       
+11. mkdir testcase
+    cd testcase
+    touch -d '1918-11-11 11:00 GMT' wwi-armistice
+    touch now
+    sleep 1
+    touch now1
+    TZ=UTC0 ls -lt --full-time wwi-armistice now now1
+I get:
+-rw-r--r-- 1 michaely csugrad 0 2054-12-17 17:28:16.000000000 +0000
+    wwi-armistice 
+-rw-r--r-- 1 michaely csugrad 0 2016-10-29 03:19:49.809712000 +0000 now1
+-rw-r--r-- 1 michaely csugrad 0 2016-10-29 03:19:46.245932000 +0000 now
+
+Seasnet doesn't do well because it shows 2054 as the date for wwi-armistice
+since it uses unsigned 32-bit time stamps.

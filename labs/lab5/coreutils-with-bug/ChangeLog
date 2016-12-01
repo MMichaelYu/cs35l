@@ -1,0 +1,4 @@
+2016-10-29  Michael Yu  <michaely@lnxsrv07.seas.ucla.edu>
+
+	* lib/timespec.h: Debug an error with huge negative numbers, leading to incorrect ordering.
+

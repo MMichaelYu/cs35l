@@ -1,0 +1,96 @@
+cd cs35l/lab4
+   I move into my working directory.
+
+1. gitclone ~eggert/src/gnu/diffutils
+   I copy diffutils into my working directory.
+cd diffutils
+   I move to the diffutils directory.
+
+2. git log > git-log.txt
+   I put the log of changes into git-log.txt.
+
+3. git tag > git-tags.txt
+   I put the tags into git-tags.txt.
+
+4. emacs git-log.txt
+C-s quote 'like Enter
+C-p C-p C-p C-p M-b C-SP M-f M-W
+    I find and copy the hash for the correct patch in emacs.
+C-x C-c
+    Then I close emacs.
+git show 62ca21c8c1a5aa3488589dcb191a4ef04ae9ed4f > quote-patch.txt
+
+5. git checkout v3.0 -b newbranch
+   I checkout diffutils v3.0 in a new branch.
+
+6. patch -p1 < quote-patch.txt
+   I apply the patch for quoting things.
+
+These are the problems I received:
+9 out of 9 hunks ignored
+Hunk #10 FAILED at 876.
+Hunk #11 FAILED at 906.
+Hunk #12 FAILED at 942.
+Hunk #6 FAILED at 433.
+1 out of 9 hunks FAILED -- saving rejects to file src/diff3.c.rej
+patching file src/dir.c
+
+7. git status
+   I see that many files have been modified due to the patch.
+
+8. Learning emacs functions
+
+9. emacs <non .c files>
+C-x v = C-x v u yes Enter
+    I go through and revert all changes to the non .c files.
+non .c files: NEWS, README, README-hacking, TODO, cfg.mk, doc/diagmeet.note,
+   ms/config.bat, ms/config.site, po/en.po, src/diff.h, src/system.h,
+   tests/help-version 
+emacs <.c files>
+C-x v = C-u C-c C-a
+    I go through each hunk and decide whether to keep or delete the files
+   depending on if the changes affected character strings.
+.c files: src/analyze.c, src/cmp.c, src/context.c, src/diff.c, src/diff3.c,
+   src/dir.c, src/ifdef.c, src/io.c, src/sdiff.c, src/side.c, src/util.c 
+
+10. I manually type in rejected patches from src/diff3.c.rej and src/diff.c.rej
+ 
+11. git clean -f
+    I remove untracked files.
+
+12. git status
+    I make sure that there are a half dozen modified files.
+git diff > quote-3.0-patch.txt
+    I put the changes into a file.
+
+13. export PATH=/usr/local/cs/bin:$PATH
+    This finds the help2man program needed for bootstrap.
+./bootstrap
+wgets http://web.cs.ucla.edu/classes/fall16/cs35L/assign/diffutils-gets.diff
+patch -p0 < diffutils-gets.diff
+      I apply an extra patch after ./bootstrap and before ./configure.
+./configure
+make 
+make check
+     These were the instructions on building diffutils.
+
+14. cd..
+    I go to my lab4 directory.
+mkdir diffutils-3.0
+mkdir diffutils-3.0-patch
+cd diffutils
+cp -r ./src ../diffutils-3.0-patch
+   I copy the modified diffutils source to diffutils-3.0-patch.
+git checkout -f v3.0
+cp -r ./src ../diffutils-3.0
+   I copy the unmodified 3.0 diffutils source to diffutils-3.0.
+cd ..
+./diffutils-3.0-patch/src/diff -pru diffutils-3.0/src diffutils-3.0-patch/src
+    >quote-3.0-test.txt 
+    I compare the source codes and information can be foud in
+    quote-3.0-test.txt.
+
+15. diff quote-3.0-test.txt ./diffutils/quote-3.0-patch.txt
+    Comparing the two files, they are not the same but the differences are
+    innocuous. 
+

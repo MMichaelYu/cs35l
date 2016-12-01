@@ -1,0 +1,8 @@
+#include <stdio.h>
+#include <math.h>
+int main()
+{
+  float num = cos(0.5);
+  printf("%.17g", num);
+  return 0;
+}

@@ -1,0 +1,6 @@
+#!/bin/bash
+for x in "$(ls /usr/bin | awk 'NR%101==704637121%101')"
+do
+y=`which $x`
+ldd $y
+done
